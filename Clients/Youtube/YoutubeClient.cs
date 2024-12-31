@@ -9,8 +9,7 @@ namespace PlaylistConverter.Client;
 public class YoutubeClient : IYoutubeClient
 {
     private readonly string _key;
-    private readonly string _youtubeBase = "https://www.googleapis.com/youtube/v3";
-    private readonly string _playlistItemsUrl = "/playlistItems";
+    private readonly string _playlistItemsUrl = "https://www.googleapis.com/youtube/v3/playlistItems";
     
     private HttpClient _httpClient { get; }
 
@@ -24,16 +23,18 @@ public class YoutubeClient : IYoutubeClient
     {
         List<PlaylistItem> result = [];
         
-        Dictionary<string, string> queryParams = new();
-        queryParams["playlistId"] = playlistId;
-        queryParams["part"] = "snippet";
-        queryParams["key"] =  _key;
+        Dictionary<string, string> queryParams = new()
+        {
+            {"key", _key},
+            {"playlistId", playlistId},
+            {"part", "snippet"},
+        };
         
         bool hasNextPage;
         do
         {
-            var url = _youtubeBase + _playlistItemsUrl;
-            HttpResponseMessage response = await _httpClient.GetAsync(QueryHelpers.AddQueryString(url, queryParams));
+            HttpResponseMessage response = await _httpClient.GetAsync(
+                QueryHelpers.AddQueryString(_playlistItemsUrl, queryParams!));
             if (!response.IsSuccessStatusCode)
                 break;
             

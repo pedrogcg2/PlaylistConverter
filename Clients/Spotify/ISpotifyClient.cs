@@ -1,4 +1,4 @@
-namespace playlist_converter.Client.Spotify;
+namespace PlaylistConverter.Client.Spotify;
 
 public interface ISpotifyClient
 {

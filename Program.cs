@@ -1,19 +1,13 @@
 using PlaylistConverter.Client;
+using PlaylistConverter.Client.Spotify;
+using PlaylistConverter.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IYoutubeClient, YoutubeClient>();
+builder.Services.AddScoped<ISpotifyClient, SpotifyClient>();
+builder.Services.AddOpenApi();
 var app = builder.Build();
-
-app.MapGet("/", () => "Hello World!");
-
-app.MapGet("/youtube-playlist/{id}", async (string id, IYoutubeClient client) =>
-{
-    var result = await client.GetPlaylistItems(id);
-    
-    if (result.Count == 0)
-        return Results.NotFound();
-    
-    return Results.Ok(result);
-});
+app.MapOpenApi();
+app.MapConverterEndpoints();
 
 app.Run();
