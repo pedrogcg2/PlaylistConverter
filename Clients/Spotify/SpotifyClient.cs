@@ -42,14 +42,15 @@ public class SpotifyClient : ISpotifyClient
         if (!response.IsSuccessStatusCode)
             return "";
 
-        var result = await response.DeserializeContent<SpotifyResponse<SpotifyTrackItem>>();
-        return result.Items[0].ExternalUrl.Spotify;
+        var result = await response.DeserializeContent<SpotifyTrackResponse<SpotifyTrackItem>>(_jsonSerializerOptions);
+        return result.Tracks.Items[0].ExternalUrls.Spotify;
     }
 
     private async Task<string> GetAccessToken()
     {
         HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, SpotifyConstants.GetAccessTokenUrl);
-        request.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+        Dictionary<string, string> form = new() {{"grant_type", "client_credentials"}};
+        request.Content = new FormUrlEncodedContent(form);
         
         var auth = System.Convert.ToBase64String(
             ASCIIEncoding.ASCII.GetBytes(_clientId + ":" + _clientSecret));
@@ -76,6 +77,8 @@ public static class SpotifyConstants
 
 public record SpotifyAccountResponse(string AccessToken, string TokenType, int ExpiresIn);
 
+public record SpotifyTrackResponse<T>(SpotifyResponse<T> Tracks);
+
 public class SpotifyResponse<T>
 {
     public string Href { get; set; }
@@ -93,6 +96,6 @@ public class SpotifyResponse<T>
     public List<T> Items { get; set; }
 }
 //todo: eval the use of ISRC to find titles and tacks
-public record SpotifyTrackItem(string Id, SpotifyExternalUrl ExternalUrl);
+public record SpotifyTrackItem(string Id, SpotifyExternalUrl ExternalUrls);
 
 public record SpotifyExternalUrl(string Spotify);
